@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}{{ sdc.displayname }} List{% endblock %}
+
+{% block content %}
+<h1>{{ sdc.displaynameplural }}</h1>
+
+{% if sdc.has_maint_page %}
+  <a class="btn btn-primary mb-2" href="/new/{{ sdc.table }}">Create New {{ sdc.displayname }}</a>
+{% endif %}
+
+<table class="table">
+  <thead><tr>
+    {% for column in sdc.columns | selectattr("listable") %}<th>{{ column.displayname }}</th>{% endfor %}
+  </tr></thead>
+
+  <form method="post">
+      {#
+      <div class="form-group">
+        <label for="location-id">Location ID</label>
+        <input type="text" class="form-control" id="location-id" name="location_id" placeholder="Enter Location ID">
+      </div>
+      <div class="form-group">
+        <label for="location-desc">Location Description</label>
+        <input type="text" class="form-control" id="location-desc" name="location_desc" placeholder="Enter Location Description">
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+      #}
+    </form>
+
+  <tbody>
+    {% for sdi in sdis %}
+      <tr>
+        {% for column in sdc.columns | selectattr("listable") %}
+          <td>
+            {% if column.is_pk %}
+              <a href="/maint/{{ sdc.table }}/{{ sdc.get_sdi_key(sdi) }}">{{ sdi[column.name] }}</a>
+            {% elif column.reference != None and sdi[column.name] != None %}
+              <a href="/maint/{{ column.reference.table }}/{{ sdc.get_sdi_reference_key(sdi, column.reference.table) }}">{{ sdi[column.name] }}</a>
+            {% elif sdi[column.name] == None %}
+              <small class="text-muted">nil</small>
+            {% else %}
+              {{ sdi[column.name] }}
+            {% endif %}
+          </td>
+        {% endfor %}
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

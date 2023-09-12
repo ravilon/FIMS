@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Dataentry ({{ sdc.displayname }}) {{ sdc.get_sdi_key(sdi) }}{% endblock %}
+
+{% block content %}
+<h1>{{ sdc.displayname }} {{ sdc.get_sdi_key(sdi) }} Dataentry</h1>
+
+<form method="post">
+    <button type="submit" class="btn btn-primary mb-3">Save</button>
+
+    <table class="table">
+        <thead><tr>
+            {% for di in dataitems %}
+                <th>
+                    <label for="{{ di.dataitemid}}">
+                        {{ di.paramdesc }} ({{ di.dataitemstatus }})
+                    </label>
+                </th>
+            {% endfor %}
+        </tr></thead>
+
+        <tbody>
+            <tr>
+                {% for di in dataitems %}
+                <td>
+                    <input
+                        name="{{ di.dataitemid }}"
+                        type="text"
+                        class="form-control"
+                        {% if di.dataitemstatus == 'Released' %}readonly{% endif %}
+                        value="{{ '' if di.dataitemvalue == None else di.dataitemvalue }}"
+                        placeholder="{{ '' if di.dataitemvalue == None else di.dataitemvalue }}"
+                    >
+                </td>
+                {% endfor %}
+            </tr>
+        </tbody>
+    </table>
+</form>
+{% endblock %}

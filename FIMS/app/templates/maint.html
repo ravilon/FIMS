@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}{{ sdc.displayname }} Maint{% endblock %}
+
+{% block content %}
+<h1>{{ sdc.displayname }}</h1>
+{% if not new %}
+  <div class="ml-0 row">
+    <form method="get" action="/new/{{ sdc.table }}">
+      <button type="submit" class="form-group btn btn-primary mb-5 mr-2">Create another {{ sdc.displayname }}</button>
+    </form>
+    {% if sdc.has_data_entry %}
+      <form method="get" action="/dataentry/{{ sdc.get_sdi_key(sdi) }}">
+        <button type="submit" class="btn btn-primary mb-5">Dataentry</button>
+      </form>
+    {% endif %}
+  </div>
+{% endif %}
+
+<form method="post">
+  {% for columns in sdc.columns | batch(2) %}
+    <div class="form-group row">
+      {% for column in columns %}
+        <div class="col-6">
+          <label for="{{ column.name }}">{{ column.displayname }}</label>
+          {% if column.reference == None %}
+            <input
+              type="text"
+              class="form-control"
+              name="{{ column.name }}"
+              id="{{ column.name}}"
+              placeholder="{% if not new and sdi[column.name] != None %}{{ sdi[column.name] }}{% elif column.serial %}(auto){% endif %}"
+              value=      "{% if not new and sdi[column.name] != None %}{{ sdi[column.name] }}{% elif column.serial %}(auto){% endif %}"
+              {% if (not new and column.is_pk) or column.serial %} readonly {% endif %}
+            >
+          {% else %}
+            <select class="form-control" name="{{ column.name }}" id="{{ column.name }}">
+            {% if column.nullable %}
+              <option value=""></option>
+            {% endif %}
+            {% for option in ref_options[column.name] %}
+              <option value="{{ option }}" {% if not new and sdi[column.name] == option %}selected{% endif %}>{{ option }}</option>
+            {% endfor %}
+            </select>
+          {% endif %}
+          {% if column.nullable %}<small class="form-text text-muted">nullable.</small>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% endfor %}
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+{% endblock %}
