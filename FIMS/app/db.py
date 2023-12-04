@@ -6,8 +6,10 @@ from psycopg2.extras import RealDictCursor
 def db():
     return psycopg2.connect(
         host='localhost',
-        user=os.environ['DB_USERNAME'],
-        password=os.environ['DB_PASSWORD'],
+        user='FIMS',
+        password='Inter@1234',
+        dbname='FIMS',
+        port=8857,
         cursor_factory=RealDictCursor # Allows access via column name like locations['locationdesc'] instead of locations[1].
     )
 
