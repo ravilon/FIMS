@@ -4,8 +4,6 @@ from flask import Flask, render_template, redirect, request
 from .sdc import *
 from . import db
 
-
-
 sdclist = [
     SDC(table='location', displayname='Location', displaynameplural='Locations', columns=[
         Column('locationid',   'ID',          None, is_pk=True),
@@ -86,14 +84,6 @@ sdclist = [
     ], has_list_page=False, has_maint_page=False),
 ]
 sdcs = {sdc.table: sdc for sdc in sdclist}
-
-try:
-    result = db.run('SELECT 1')
-    print('Database connection successful.')
-    # Use the 'result' variable if needed
-except Exception as e:
-    print(f'Error: {e}')
-
 
 app = Flask(__name__)
 
