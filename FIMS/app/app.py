@@ -1,8 +1,8 @@
 import os
 from flask import Flask, render_template, redirect, request
 
-from .sdc import *
-from . import db
+from sdc import *
+from db import *
 
 sdclist = [
     SDC(table='location', displayname='Location', displaynameplural='Locations', columns=[
@@ -97,7 +97,7 @@ def index(): return render_template('index.html', sdclist=sdclist)
 def list(sdcid):
     sdc = sdcs[sdcid.lower()]
     columns = filter(lambda c: c.listable, sdc.columns)
-    sdis = db.run(f'SELECT {", ".join([f"{sdc.table}.{c.name}" for c in columns])} FROM {sdc.table}')
+    sdis = run(f'SELECT {", ".join([f"{sdc.table}.{c.name}" for c in columns])} FROM {sdc.table}')
     print(sdis)
 
     return render_template('list.html', sdclist=sdclist, sdc=sdc, sdis=sdis)
@@ -105,7 +105,7 @@ def list(sdcid):
 @app.route('/debug/list/<sdcid>')
 def list_debug(sdcid):
     sdc = sdcs[sdcid.lower()]
-    return [f'SELECT {",".join([c.name for c in sdc.columns])} FROM {sdc.table}', db.run(f'SELECT {",".join([c.name for c in sdc.columns])} FROM {sdc.table}')]
+    return [f'SELECT {",".join([c.name for c in sdc.columns])} FROM {sdc.table}', run(f'SELECT {",".join([c.name for c in sdc.columns])} FROM {sdc.table}')]
 
 @app.route('/new/<sdcid>', methods=['GET', 'POST'])
 def new_maint(sdcid):
@@ -114,7 +114,7 @@ def new_maint(sdcid):
     if request.method == 'POST':
         pk   = [e for e in filter(lambda c: c.is_pk, sdc.columns)][0]
         vals = {k: sdc.escape(k, v) for k, v in dict(request.form).items() if k != pk.name or (k == pk.name and not pk.serial)}
-        sdi_pk = db.run(f'INSERT INTO {sdc.table} ({", ".join(vals.keys())}) VALUES ({", ".join(vals.values())}) RETURNING {pk.name}')[0]
+        sdi_pk = run(f'INSERT INTO {sdc.table} ({", ".join(vals.keys())}) VALUES ({", ".join(vals.values())}) RETURNING {pk.name}')[0]
 
         return redirect(f'/maint/{sdcid}/{sdi_pk[pk.name]}')
 
@@ -129,7 +129,7 @@ def maint(sdcid, sdi, new=False):
         pk_column_names = [e.name for e in filter(lambda c: c.is_pk, sdc.columns)]
         where   = {f'{k} = {sdc.escape(k, v)}' for k, v in dict(request.form).items() if k     in pk_column_names}
         newvals = {f'{k} = {sdc.escape(k, v)}' for k, v in dict(request.form).items() if k not in pk_column_names}
-        db.run(f'UPDATE {sdc.table} SET {", ".join(newvals)} WHERE {", ".join(where)}', fetch=False)
+        run(f'UPDATE {sdc.table} SET {", ".join(newvals)} WHERE {", ".join(where)}', fetch=False)
 
     if not new:
         pks = sdi.split(';')
@@ -137,12 +137,12 @@ def maint(sdcid, sdi, new=False):
         assert len(pks) == len(pk_columns)
 
         wheres = [f'{sdc.table}.{col.name} = {col.escape(val)}' for col, val in zip(pk_columns, pks)]
-        sdi = db.run(f'SELECT * FROM {sdc.table} WHERE ' + ' AND '.join(wheres))[0]
+        sdi = run(f'SELECT * FROM {sdc.table} WHERE ' + ' AND '.join(wheres))[0]
     else:
         sdi = None
 
     ref_cols = [c for c in sdc.columns if c.reference != None]
-    ref_options = {c.name: [v[c.reference.column] for v in db.run(f'SELECT DISTINCT {c.reference.table}.{c.reference.column} FROM {c.reference.table}')] for c in ref_cols}
+    ref_options = {c.name: [v[c.reference.column] for v in run(f'SELECT DISTINCT {c.reference.table}.{c.reference.column} FROM {c.reference.table}')] for c in ref_cols}
 
     return render_template('maint.html', new=new, sdclist=sdclist, sdc=sdc, sdi=sdi, ref_options=ref_options)
 
@@ -162,7 +162,7 @@ def dataentry(dataset):
             ids      = [id for (id, _, _) in values]
             statuses = [f'WHEN {id} THEN {status}' for (id, status, _) in values]
             values   = [f'WHEN {id} THEN {value}'  for (id, _, value) in values]
-            db.run(f'''
+            run(f'''
                 UPDATE dataitem SET
                     dataitemstatus = CASE dataitemid {" ".join(statuses)} END,
                     dataitemvalue  = CASE dataitemid {" ".join(values)}   END
@@ -174,9 +174,9 @@ def dataentry(dataset):
     assert len(pks) == len(pk_columns)
 
     wheres = [f'{sdc.table}.{col.name} = {col.escape(val)}' for col, val in zip(pk_columns, pks)]
-    sdi = db.run(f'SELECT * FROM {sdc.table} WHERE ' + ' AND '.join(wheres))[0]
+    sdi = run(f'SELECT * FROM {sdc.table} WHERE ' + ' AND '.join(wheres))[0]
 
-    dataitems = db.run(f'''
+    dataitems = run(f'''
         SELECT di.*, paramdesc
         FROM dataitem di
             JOIN dataset ds  ON di.dataset = ds.datasetid
@@ -190,7 +190,7 @@ def reinit():
     with open('app/sql/create_FIMS_tables.sql') as f: schema_sql      = f.read()
     with open('app/sql/create_Master_Data.sql') as f: master_data_sql = f.read()
     with open('app/sql/dataset_trigger.sql')    as f: dataset_trigger = f.read()
-    db.run( schema_sql + master_data_sql + dataset_trigger, fetch = False)
+    run( schema_sql + master_data_sql + dataset_trigger, fetch = False)
     return (schema_sql + master_data_sql + dataset_trigger).replace('\n', '<br>')
 
 @app.route('/debug/pwd')
