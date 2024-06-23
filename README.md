@@ -17,3 +17,6 @@ Farm Infromation Management System
 ### Runing 
 * on FIMS run runFIMS.ps1
 
+## Accessing the System
+![image](https://github.com/ravilon/FIMS/assets/94138486/422e15b4-21f3-46a1-be3d-21cbb7710d01)
+
