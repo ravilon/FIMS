@@ -30,5 +30,7 @@ Farm Infromation Management System
 ![image](https://github.com/ravilon/FIMS/assets/94138486/45b3b2e3-e4ea-40a7-8534-8e3efa479ed8)
 
 ## There is a lot of other functions...
+![image](https://github.com/ravilon/FIMS/assets/94138486/475166a3-3890-4398-9f47-c64cd1e1bd7e)
+
 ![image](https://github.com/ravilon/FIMS/assets/94138486/db474b19-a9f7-4e71-abf5-e704264d15d2)
 
