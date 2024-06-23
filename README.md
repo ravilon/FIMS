@@ -1,6 +1,9 @@
 # FIMS
 Farm Infromation Management System
 
+# DER Model
+![pdf](https://github.com/ravilon/FIMS/blob/main/Modelo%20DER.pdf)
+
 ## Requirements
 
 * flask
