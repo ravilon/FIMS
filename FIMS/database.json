@@ -1,0 +1,7 @@
+{
+    "host": "localhost",
+    "port": "8857",
+    "database": "FIMS",
+    "user": "FIMS",
+    "password": "Inter@1234"
+}
