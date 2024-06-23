@@ -2,7 +2,7 @@
 Farm Infromation Management System
 
 # DER Model
-![url](https://github.com/ravilon/FIMS/blob/main/Modelo%20DER.pdf)
+https://github.com/ravilon/FIMS/blob/main/Modelo%20DER.pdf
 
 ## Requirements
 
